@@ -1,0 +1,10 @@
+{
+    "[c]" : {
+        "editor.insertSpaces": true,
+        "editor.tabSize": 2
+    },
+    "C_Cpp.formatting": "disabled",
+    "files.associations": {
+        "cnpf.h": "c"
+    }
+}

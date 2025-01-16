@@ -1,0 +1,31 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "type": "cppbuild",
+            "label": "build (danielsource)",
+            "command": "cl.exe",
+            "args": [
+                "/nologo",
+                "/source-charset:utf-8",
+                "/std:c11",
+                "/W4",
+                "/wd4100",
+                "/Zi",
+                "/Fe${workspaceFolder}\\cnpf.exe",
+                "${workspaceFolder}\\cnpf.c"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [
+                "$msCompile"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "detail": "compiler: cl.exe"
+        }
+    ]
+}

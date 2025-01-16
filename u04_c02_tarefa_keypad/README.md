@@ -1,6 +1,6 @@
 # Tarefa 1 - Unidade 4 - Capítulo 2
 
-**[Vídeo da tarefa](#TODO)**.
+**[VÍDEO DA TAREFA](#TODO)**.
 
 Projeto para Raspberry Pi Pico com teclado matricial 4x4, 3 LEDs e 1
 buzzer. O teclado suporta um pressionamento de tecla por vez, sendo

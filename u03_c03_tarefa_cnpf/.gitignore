@@ -1,0 +1,7 @@
+/cnpf
+*.exe
+*.ilk
+*.o
+*.obj
+*.pch
+*.pdb
