@@ -1,0 +1,112 @@
+==============
+-*- RP2040 -*-
+==============
+
+Note: In the context of computer memory, usually k=1024 and M=1024^2 are
+      used instead of the SI prefixes k=1000 and M=1000^2 (and G=1000^3 ...)
+
+* CPU: Dual ARM Cortex-M0+, up to 133MHz
+* Memory
+  * 264kB on-chip SRAM in 6 independent banks
+  * Support for up to 16MB of off-chip Flash memory via dedicated QSPI bus
+* Architecture: DMA controller
+* Interfacing: 30 GPIO pins, 4 of which can be used as analogue inputs
+* 4 channel ADC with internal temperature sensor, 500ksps, 12-bit conversion
+* Peripherals
+  * 2 UARTs
+  * 2 SPI controllers
+  * 2 I2C controllers
+  * 16 PWM channels
+  * USB 1.1 controller and PHY, with host and device support
+  * 8 PIO state machines (programmable IO for extended peripheral support)
+* Package: 7x7 mm QFN-56 package
+* Operating temperature of -40C to +85C
+* Drag-and-drop programming using mass storage over USB
+* Low-power sleep and dormant modes
+* Temperature sensor
+* Accelerated integer and floating-point libraries on-chip
+
+RP 2 0 4 0
+-- - - - -
+|  | | | |
+|  | | | \_ floor(log2(nonvolatile/128kB)) or
+|  | | |    0 if no onboard nonvolatile storage
+|  | | |
+|  | | \___ floor(log2(RAM/16kB))
+|  | |
+|  | \_____ Type of core    (M0+)
+|  |
+|  \_______ Number of cores (2)
+|
+\__________ Raspberry Pi    :)
+
+    .--------------------------------------------------------------------------------------.
+    |A system overview of the RP2040 chip                   .---------------.              |
+    | .--------. .--------------------------------------.   |.-----.        |     @@@      |
+    | |IOs     | |Clock generation .-------------------.|   ||Inter|-.      |     @@@      |
+    | |        | |                 |Internal oscillator||   ||rupts|.|      |         @@@  |
+    | |        | |                 '-------------------'|   |'-----'||      |         @@@  |
+    | |.-------#-#-----------------PLL                  | .-#-----. ||      | @@@ @@@ @@@  |
+<<---->>Crystal| |                                      | | |   .-|-||-. .-.| @@@ @@@ @@@  |
+    | |'-------#-#-----------------PLL                  | | | .--Proc|0| |S||              |
+    | |        | '--------------------------------------' | | | '----|---|I||              |
+    | |.------.|                                          | | | .----|---|O||              |
+<<----->> SWD -#------------------------------------------|-#-+--Proc 1| '-'|              |
+    | |'------'|    @@@@  @@@@  @@@@  @@@@  @  @  @@@@    | |   '-|----'  | |              |
+    | |        |    @  @  @  @     @  @  @  @  @  @  @    | |     |       | |              |
+    | |        |    @@@   @@@@  @@@   @  @  @@@@  @  @    | |     |       | |              |
+    | |.------.|    @  @  @     @@@@  @@@@     @  @@@@    | |     |       | | .----.       |
+    | ||      -#-+----------------------------------------|-#-----|-------' | |DMA |       |
+    | ||      || |                                        | '-----#---------' '|--|'       |
+    | ||      || | .-----------------------------------.  |       |            |  |        |
+    | ||      || | |Peripherals                        |  |       |            |  |        |
+    | ||      || | |===================================| .#-------#------------#--#-.      |
+    | ||      || | | SPI x2     Reset control          | |                          |      |
+    | ||      || | | PWM        Power on state machine | |                          |      |
+<<----->>     -#-|-# UART x2    Sysctrl                #-#                          |      |
+    | ||      || | | Timer      Sysinfo                | |        Bus Fabric        |      |
+    | || GPIO || | | RTC        Watchdog               | |                          |      |
+    | ||[29:0]|| | | I2C x2                            | |                          |      |
+    | ||      || | | ADC & TS                          | |                          #---.  |
+    | ||      || | '-----------------------------------' '-#--#-------#---#--######-'   |  |
+    | ||      || |                                         |  |       |   |  ||||||   .-#-.|
+    | ||      || |                                     .---#--#---. .-#---#--######-. |USB<<-->>
+    | ||      || |                                     |PIO0  PIO1| |X/C |R| SRAM SRAM'---'|
+    | ||      || |                                     ||========|| |I a |O| SRAM SRAM     |
+    | ||      || |                                     ||  PIO   || |P c |M| SRAM SRAM     |
+    | ||      || |                                     '#--------#. |  h | | SRAM SRAM     |
+    | ||      -#-|--------------------------------------'        |  |  e | |        |      |
+    | ||      -#-|-----------------------------------------------'  |=|=============|      |
+    | |'------'| |                                                  | |  Memory     |      |
+    | |        | |                                                  '-#-------------'      |
+    | |.-------#-'                                                    |                    |
+<<----->>QSPI ||                                                      |        .-----------|
+    | |'-------#------------------------------------------------------'        |Core Supply|
+    |                                                                          |Regulator <<-->>
+    '--------------------------------------------------------------------------------------'
+
+  Debug is available via the SWD interface.
+
+  Internal SRAM can contain code or data.
+
+  DMA bus masters are available to offload repetitive data transfer tasks
+  from the processors.
+
+  GPIO pins can be driven directly, or from a variety of dedicated logic
+  functions.
+
+  Dedicated hardware for fixed functions such as SPI, I2C, UART.
+
+  Flexible configurable PIO controllers can be used to provide a wide
+  variety of IO functions.
+
+  An internal Voltage Regulator to supply the core voltage so the end
+  product only needs supply the IO voltage.
+
+TODO: Pinout
+
+###
+
+Everything was based on the RP2040 Datasheet (rptl.io/rp2040-datasheet).
+
+vim:set nowrap:
