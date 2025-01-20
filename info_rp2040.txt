@@ -26,6 +26,7 @@ Note: In the context of computer memory, usually k=1024 and M=1024^2 are
 * Temperature sensor
 * Accelerated integer and floating-point libraries on-chip
 
+
 RP 2 0 4 0
 -- - - - -
 |  | | | |
@@ -39,6 +40,7 @@ RP 2 0 4 0
 |  \_______ Number of cores (2)
 |
 \__________ Raspberry Pi    :)
+
 
     .--------------------------------------------------------------------------------------.
     |A system overview of the RP2040 chip                   .---------------.              |
@@ -103,10 +105,74 @@ RP 2 0 4 0
   An internal Voltage Regulator to supply the core voltage so the end
   product only needs supply the IO voltage.
 
-TODO: Pinout
+
+           QSPI_SS_N
+  P        ^   QSPI_SD1
+   i       |   ^   QSPI_SD2
+    n      |   |   ^   QSPI_SD0
+     o     |   |   |   ^   QSPI_SCLK
+      u    |   |   |   |   ^   QSPI_SD3
+       t   |   |   |   |   |   ^   DVDD
+           |   |   |   |   |   |   ^   IOVDD
+           |   |   |   |   |   |   |   ^   USB_VDD
+           |   |   |   |   |   |   |   |   ^   USB_DP
+           |   |   |   |   |   |   |   |   |   ^   USB_DM
+           |   |   |   |   |   |   |   |   |   |   ^   VREG_VOUT
+           |   |   |   |   |   |   |   |   |   |   |   ^   VREG_VIN
+           |   |   |   |   |   |   |   |   |   |   |   |   ^   ADC_AVDD
+           |   |   |   |   |   |   |   |   |   |   |   |   |   ^
+       ::::[56][55][54][53][52][51][50][49][48][47][46][45][44][43]::::
+ IOVDD [01](  )::::::::::::::::::::::::::::::::::::::::::::::::::::[42] IOVDD
+ GPIO0 [02]::::::::::::::::::::::::::::::::::::::::::::::::::::::::[41] GPIO29/ADC3
+ GPIO1 [03]::::::::::::::::::::::::::::::::::::::::::::::::::::::::[40] GPIO28/ADC2
+ GPIO2 [04]::::::::::::::::::::::::::::::::::::::::::::::::::::::::[39] GPIO27/ADC1
+ GPIO3 [05]::::::::::::::::::::................::::::::::::::::::::[38] GPIO26/ADC0
+ GPIO4 [06]::::::::::::::::::::................::::::::::::::::::::[37] GPIO25
+ GPIO5 [07]::::::::::::::::::::......GND.......::::::::::::::::::::[36] GPIO24
+ GPIO6 [08]::::::::::::::::::::................::::::::::::::::::::[35] GPIO23
+ GPIO7 [09]::::::::::::::::::::................::::::::::::::::::::[34] GPIO22
+ IOVDD [10]::::::::::::::::::::................::::::::::::::::::::[33] IOVDD
+ GPIO8 [11]::::::::::::::::::::::::::::::::::::::::::::::::::::::::[32] GPIO21
+ GPIO9 [12]::::::::::::::::::::::::::::::::::::::::::::::::::::::::[31] GPIO20
+GPIO10 [13]::::::::::::::::::::::: TOP VIEW :::::::::::::::::::::::[30] GPIO19
+GPIO11 [14]::::::::::::::::::::::::::::::::::::::::::::::::::::::::[29] GPIO18
+       ::::[15][16][17][18][19][20][21][22][23][24][25][26][27][28]::::
+           |   |   |   |   |   |   |   |   |   |   |   |   |    v
+           |   |   |   |   |   |   |   |   |   |   |   |   v    GPIO17
+           |   |   |   |   |   |   |   |   |   |   |   v   GPIO16
+           |   |   |   |   |   |   |   |   |   |   v   RUN
+           |   |   |   |   |   |   |   |   |   v   SWDIO
+           |   |   |   |   |   |   |   |   v   SWCLK
+           |   |   |   |   |   |   |   v   DVDD
+           |   |   |   |   |   |   v   IOVDD
+           |   |   |   |   |   v   XOUT
+           |   |   |   |   v   XIN
+           |   |   |   v   TESTEN
+           |   |   v   GPIO15
+           |   v   GPIO14
+           v   GPIO13
+           GPIO12
+
+  GPIOx              General-purpose digital input and output
+  GPIOx/ADCy         General-purpose digital input and output, with analogue-to-digital converter function
+  QSPIx              Interface to an SPI, Dual-SPI or Quad-SPI Flash device, with execute-in-place support
+  USB_DM and USB_DP  USB controller, supporting full-speed device and full-/low-speed host
+  XIN and XOUT       Connect a crystal to RP2040’s crystal oscillator
+  RUN                Global asynchronous reset pin; reset when driven low, run when driven high
+  SWCLK and SWDIO    Access to the internal Serial Wire Debug multi-drop bus; provides debug access to both processors
+  TESTEN             Factory test mode pin
+  GND                Single external ground connection, bonded to a number of internal ground pads on the RP2040 die
+  IOVDD              Power supply for digital GPIOs, nominal voltage 1.8 V to 3.3 V
+  USB_VDD            Power supply for internal internal USB full-speed PHY, nominal voltage 3.3 V
+  ADC_AVDD           Power supply for analogue-to-digital converter, nominal voltage 3.3 V
+  VREG_VIN           Power input for the internal core voltage regulator, nominal voltage 1.8 V to 3.3 V
+  VREG_VOUT          Power output for the internal core voltage regulator, nominal voltage 1.1 V, 100 mA max current
+  DVDD               Digital core power supply, nominal voltage 1.1 V
+
 
 ###
 
+
 Everything was based on the RP2040 Datasheet (rptl.io/rp2040-datasheet).
 
-vim:set nowrap:
+vim:set ts=8 sw=8 et nowrap tw=0:
