@@ -157,7 +157,7 @@ GPIO11 [14]::::::::::::::::::::::::::::::::::::::::::::::::::::::::[29] GPIO18
   GPIOx/ADCy         General-purpose digital input and output, with analogue-to-digital converter function
   QSPIx              Interface to an SPI, Dual-SPI or Quad-SPI Flash device, with execute-in-place support
   USB_DM and USB_DP  USB controller, supporting full-speed device and full-/low-speed host
-  XIN and XOUT       Connect a crystal to RP2040’s crystal oscillator
+  XIN and XOUT       Connect a crystal to RP2040's crystal oscillator
   RUN                Global asynchronous reset pin; reset when driven low, run when driven high
   SWCLK and SWDIO    Access to the internal Serial Wire Debug multi-drop bus; provides debug access to both processors
   TESTEN             Factory test mode pin
