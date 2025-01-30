@@ -1,0 +1,31 @@
+The BitDogLab v6.3 board includes a Pico W.
+(https://github.com/BitDogLab/BitDogLab)
+
+GPIOs
+-----
+
+button a        = GP5
+button b        = GP6
+led matrix      = GP7
+buzzer b        = GP10
+led g           = GP11
+led b           = GP12
+led r           = GP13
+display sda     = GP14
+display scl     = GP15
+buzzer a        = GP21
+joystick button = GP26
+joystick y      = GP26
+joystick x      = GP27
+microphone      = GP28 (jumper 1)
+
+idc:
+  GP4
+  GP8
+  GP9
+  GP16
+  GP17
+  GP18
+  GP19
+  GP20
+  GP28 (jumper 1)
