@@ -2,9 +2,9 @@
 
 **[VÍDEO DA TAREFA](https://www.youtube.com/watch?v=82D6gPb8KjQ)**.
 
-Projeto para o [BitDogLab](https://github.com/BitDogLab/BitDogLab) 6.3
+Projeto para a [BitDogLab](https://github.com/BitDogLab/BitDogLab) 6.3
 (baseado no Pico W). Utilizando a comunicação serial, é feito o acionamento
-de periféricos embutidos no BitDogLab: LED RGB (GPIO 11, 12, 13) e buzzer
+de periféricos embutidos na BitDogLab: LED RGB (GPIO 11, 12, 13) e buzzer
 (GPIO 21).
 
 Controles no terminal serial:

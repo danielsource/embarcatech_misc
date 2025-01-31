@@ -1,6 +1,4 @@
-# trafficsign - Tarefa 1 (unidade 4, capítulo 5)
-
-**[VÍDEO DA TAREFA](https://www.youtube.com/watch?v=slot8D8p3zI)**.
+# trafficsign - Atividade 1 (unidade 4, capítulo 5)
 
 ## Exemplo de compilação em GNU/Linux
 
