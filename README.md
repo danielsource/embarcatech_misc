@@ -4,7 +4,7 @@ Arquivos/tarefas do aluno Daniel de Lima Franceschetti para o programa EmbarcaTe
 
 ### Capítulo 5
 * Tarefa 2 _[sic]_ (temporizadores/alarmes na BitDogLab)
-  * [(atividade 1)](/u04_c05_tarefa01_trafficsign)
+  * [(atividade 1)](/u04_c05_tarefa01_trafficlight)
   * [(atividade 2)](/u04_c05_tarefa02_oneshottimer)
 
 ### Capítulo 4

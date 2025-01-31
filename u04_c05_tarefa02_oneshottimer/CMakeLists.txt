@@ -10,7 +10,7 @@ else ()
 endif ()
 include(${PICO_SDK_PATH}/pico_sdk_init.cmake)
 
-project(trafficsign C CXX ASM)
+project(oneshottimer C CXX ASM)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
 add_compile_options(-Wall -Wextra -Wpedantic -Wshadow)

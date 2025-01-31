@@ -6,19 +6,19 @@
 #include <stdio.h>
 #include "pico/stdlib.h"
 
-enum { SignRed, SignYellow, SignGreen, SignCount };
+enum { LightRed, SignYellow, SignGreen, SignCount };
 
-static int traffic_sign_state = SignRed;
+static int traffic_light_state = LightRed;
 
 static bool
 repeating_timer_callback(__unused struct repeating_timer *t)
 {
-	switch (traffic_sign_state) {
-	case SignRed:    gpio_put(PIN_GREEN, 1);                       break;
-	case SignYellow: gpio_put(PIN_RED, 0);                         break;
-	case SignGreen:  gpio_put(PIN_GREEN, 0); gpio_put(PIN_RED, 1); break;
+	switch (traffic_light_state) {
+	case LightRed:    gpio_put(PIN_GREEN, 1);                       break;
+	case LightYellow: gpio_put(PIN_RED, 0);                         break;
+	case LightGreen:  gpio_put(PIN_GREEN, 0); gpio_put(PIN_RED, 1); break;
 	}
-	traffic_sign_state = (traffic_sign_state+1) % SignCount;
+	traffic_light_state = (traffic_sign_state+1) % LightCount;
 	return true;
 }
 
@@ -38,7 +38,7 @@ main(void)
 	add_repeating_timer_ms(3000, repeating_timer_callback, NULL, &timer);
 
 	for (;;) {
-		printf("Sinal de trânsito: %d\n", traffic_sign_state);
+		printf("Farol de trânsito: %d\n", traffic_light_state);
 		sleep_ms(1000);
 	}
 }
