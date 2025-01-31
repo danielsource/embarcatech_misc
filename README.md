@@ -1,4 +1,7 @@
 Arquivos/tarefas do aluno Daniel de Lima Franceschetti para o programa EmbarcaTech 2024-2025.
+Na maior parte do tempo foi usado a placa [BitDogLab v6.3](https://github.com/BitDogLab/BitDogLab)
+com o [pico-sdk](https://github.com/raspberrypi/pico-sdk).
+
 
 ## Unidade 4
 
@@ -16,3 +19,22 @@ Arquivos/tarefas do aluno Daniel de Lima Franceschetti para o programa EmbarcaTe
 ### Capítulo 2
 * [Tarefa 1 (teclado matricial no Wokwi)](/u04_c02_tarefa01_keypad)
 * [Tarefa 2 (comunicação serial na BitDogLab)](/u04_c02_tarefa02_bitdoglab_serial)
+
+### Capítulo 1
+* [Tarefa 1 (manipulação de LED no Wokwi)](/u04_c01_tarefa01_morsecode)
+
+### Projetos paralelos (não são tarefas)
+* [Blink na BitDogLab](/u04_bdl_blink)
+* [Buzzer na BitDogLab (tocando música do Minecraft 🙃)](/u04_bdl_buzzer)
+* [Blink no Pico](/u04_blink)
+
+
+## Unidade 3 / Capítulo 3
+* [Tarefa 1 (praticando a linguagem C)](/u03_c03_tarefa01_cnpf)
+
+
+## Anotações diversas (em inglês)
+* [Sobre a BitDogLab](/info_bitdoglab.txt)
+* [Sobre o RP2040](/info_rp2040.txt)
+* [Sobre o Pico W](/info_pico_w.txt)
+* [Sobre o Pico SDK](/info_c_sdk.txt)
