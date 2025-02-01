@@ -4,7 +4,7 @@
 #define WS2812_WIDTH 5
 #define WS2812_HEIGHT 5
 
-static struct {
+static volatile struct {
 	PIO pio;
 	uint sm;
 	uint32_t pixels[WS2812_HEIGHT][WS2812_WIDTH];

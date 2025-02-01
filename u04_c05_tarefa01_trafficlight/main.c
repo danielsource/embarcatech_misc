@@ -8,7 +8,7 @@
 
 enum { LightRed, SignYellow, SignGreen, SignCount };
 
-static int traffic_light_state = LightRed;
+static volatile int traffic_light_state = LightRed;
 
 static bool
 repeating_timer_callback(__unused struct repeating_timer *t)
