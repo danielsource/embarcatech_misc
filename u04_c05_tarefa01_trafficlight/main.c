@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include "pico/stdlib.h"
 
-enum { LightRed, SignYellow, SignGreen, SignCount };
+enum { LightRed, LightYellow, LightGreen, LightCount };
 
 static volatile int traffic_light_state = LightRed;
 
@@ -18,7 +18,7 @@ repeating_timer_callback(__unused struct repeating_timer *t)
 	case LightYellow: gpio_put(PIN_RED, 0);                         break;
 	case LightGreen:  gpio_put(PIN_GREEN, 0); gpio_put(PIN_RED, 1); break;
 	}
-	traffic_light_state = (traffic_sign_state+1) % LightCount;
+	traffic_light_state = (traffic_light_state+1) % LightCount;
 	return true;
 }
 
