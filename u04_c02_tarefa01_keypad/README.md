@@ -22,7 +22,7 @@ make -C build
 ## Simulação
 
 Para simular esse projeto, instale ["Wokwi for VS Code"](https://marketplace.visualstudio.com/items?itemName=wokwi.wokwi-vscode).
-Abra o diretório do projeto no Visual Studio Code, presione **F1** e
+Abra o diretório do projeto no Visual Studio Code, pressione **F1** e
 selecione "Wokwi: Start Simulator".
 
 <!-- vim: set spelllang=pt_br: -->

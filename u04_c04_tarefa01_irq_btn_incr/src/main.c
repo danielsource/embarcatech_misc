@@ -8,7 +8,7 @@
 #define PIN_BUTTON_A 5
 #define PIN_BUTTON_B 6
 #define PIN_RED   13
-#include "bdl_ws2812.h" /* código para a matrix de LED 5x5 */
+#include "bdl_ws2812.h" /* código para a matriz de LED 5x5 */
 
 #define LENGTH(arr) ((int)(sizeof(arr) / sizeof(*(arr))))
 
@@ -48,10 +48,10 @@ static const uint32_t digits[] = {
 
 static volatile Button buttons[PIN_BUTTON_B+1];
 
-/* o número a ser {incre,decre}mentado pelos botões e ser exibido na matrix de LED */
+/* o número a ser {incre,decre}mentado pelos botões e ser exibido na matriz de LED */
 static volatile unsigned number = 0;
 
-/* desenha o número na matrix de LED */
+/* desenha o número na matriz de LED */
 static void
 draw_number(void)
 {

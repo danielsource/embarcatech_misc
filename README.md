@@ -14,7 +14,7 @@ com o [pico-sdk](https://github.com/raspberrypi/pico-sdk).
 * [Tarefa 1 (interrupções para botões na BitDogLab)](/u04_c04_tarefa01_irq_btn_incr)
 
 ### Capítulo 3
-* [Tarefa 1 (matrix de LEDs da BitDogLab)](/u04_c03_tarefa01_ledmatrix)
+* [Tarefa 1 (matriz de LED 5x5 da BitDogLab)](/u04_c03_tarefa01_ledmatrix)
 
 ### Capítulo 2
 * [Tarefa 1 (teclado matricial no Wokwi)](/u04_c02_tarefa01_keypad)
@@ -38,3 +38,6 @@ com o [pico-sdk](https://github.com/raspberrypi/pico-sdk).
 * [Sobre o RP2040](/info_rp2040.txt)
 * [Sobre o Pico W](/info_pico_w.txt)
 * [Sobre o Pico SDK](/info_c_sdk.txt)
+
+
+<!-- vim: set spelllang=pt_br: -->

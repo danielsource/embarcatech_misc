@@ -7,7 +7,7 @@
 /* BitDogLab built-ins */
 #define PIN_BTN_A 5
 #define PIN_BTN_B 6
-#include "bdl_ws2812.h" /* código para a matrix de LED 5x5 */
+#include "bdl_ws2812.h" /* código para a matriz de LED 5x5 */
 
 /* Keypad (usado no Wokwi) */
 #ifdef KEYPAD
