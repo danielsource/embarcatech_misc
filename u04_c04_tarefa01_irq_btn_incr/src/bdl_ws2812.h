@@ -4,13 +4,18 @@
 #define WS2812_WIDTH 5
 #define WS2812_HEIGHT 5
 
-static volatile struct {
+static struct {
 	PIO pio;
 	uint sm;
-	uint32_t pixels[WS2812_HEIGHT][WS2812_WIDTH];
+	volatile uint32_t pixels[WS2812_HEIGHT][WS2812_WIDTH];
 } WS2812;
 
-static inline void
+static inline void ws2812_init(void);
+static inline void ws2812_put_px(int x, int y, uint8_t r, uint8_t g, uint8_t b);
+static inline void ws2812_blit(void);
+static inline void ws2812_clear(void);
+
+void
 ws2812_init(void)
 {
 	uint offset;
@@ -30,11 +35,13 @@ ws2812_init(void)
 			offset,
 			WS2812_PIN);
 
-	// This will free resources and unload the PIO program:
+	ws2812_blit();
+
+	// this will free resources and unload the PIO program:
 	// pio_remove_program_and_unclaim_sm(&ws2812_program, pio, sm, offset);
 }
 
-static inline void
+void
 ws2812_put_px(int x, int y, uint8_t r, uint8_t g, uint8_t b)
 {
 	WS2812.pixels[WS2812_HEIGHT-1 - y][x] =
@@ -43,7 +50,7 @@ ws2812_put_px(int x, int y, uint8_t r, uint8_t g, uint8_t b)
 		(uint32_t)b<<8;
 }
 
-static inline void
+void
 ws2812_blit(void)
 {
 	int i, j;
@@ -64,9 +71,11 @@ ws2812_blit(void)
 					WS2812.pixels[i][j]);
 		}
 	}
+
+	busy_wait_us(500);
 }
 
-static inline void
+void
 ws2812_clear(void)
 {
 	int i, j;
