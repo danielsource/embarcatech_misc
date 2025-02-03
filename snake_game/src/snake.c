@@ -7,12 +7,12 @@
 #define PIN_BUTTON_B 6
 #include "bdl_ws2812.h"
 
+#define GAME_TICK_MS 1000
+
 #define BUTTON_FALL_DELAY_MS 50
 #define BUTTON_RISE_DELAY_MS 50
 
-#define LENGTH(arr) ((int)(sizeof(arr) / sizeof(*(arr))))
-
-enum BoardTile {TILE_EMPTY, TILE_APPLE, TILE_SNAKE};
+enum BoardTile {TILE_SNAKE=-1, TILE_EMPTY=0, TILE_APPLE=2};
 
 typedef struct {
 	bool pressed;
@@ -22,21 +22,138 @@ typedef struct {
 } Button;
 
 static volatile struct {
-	uint8_t board[25];
-	uint8_t head;
-	enum {DIR_N, DIR_E, DIR_S, DIR_W} dir;
+	int8_t board[25];
+	int8_t head;
+	enum {DIR_N, DIR_S, DIR_E, DIR_W} dir;
+	bool reset_tick_delay;
 } Game;
 
 static volatile Button buttons[PIN_BUTTON_B+1];
 
+static bool repeating_timer_callback(__unused struct repeating_timer *t);
+
+static struct repeating_timer timer;
+
+static void
+game_draw(void)
+{
+	int8_t i;
+
+	for (i = 0; i < 25; ++i) {
+		if (Game.board[i] <= TILE_SNAKE) {
+			WS2812.pixels[i] = 0x22000000;
+		} else if (Game.board[i] == TILE_EMPTY) {
+			WS2812.pixels[i] = 0x00000000;
+		} else if (Game.board[i] == TILE_APPLE) {
+			WS2812.pixels[i] = 0x00440000;
+		} else {
+			WS2812.pixels[i] = 0x01010100;
+		}
+	}
+
+	ws2812_blit();
+}
+
+static void
+game_update(bool reset_tick_delay)
+{
+	int8_t i, lasthead;
+
+	lasthead = Game.head;
+
+	switch (Game.dir) {
+	case DIR_N:
+		Game.head -= 5;
+		if (Game.head < 0)
+			Game.head += 25;
+		break;
+	case DIR_S:
+		Game.head += 5;
+		if (Game.head >= 25)
+			Game.head -= 25;
+		break;
+	case DIR_E:
+		if (Game.head%5 == 4)
+			Game.head -= 4;
+		else
+			Game.head += 1;
+		break;
+	case DIR_W:
+		if (Game.head%5 == 0)
+			Game.head += 4;
+		else
+			Game.head -= 1;
+		break;
+	}
+
+	Game.board[Game.head] = Game.board[lasthead] - 1;
+
+	for (i = 0; i < 25; ++i) {
+		if (Game.board[i] <= TILE_SNAKE) {
+			Game.board[i] += 1;
+		}
+	}
+
+	game_draw();
+
+	if (reset_tick_delay && !Game.reset_tick_delay) {
+		Game.reset_tick_delay = true;
+		add_repeating_timer_ms(GAME_TICK_MS, repeating_timer_callback, NULL, &timer);
+	}
+}
+
+static bool
+repeating_timer_callback(__unused struct repeating_timer *t)
+{
+	if (!Game.reset_tick_delay) {
+		game_update(false);
+		return true;
+	} else {
+		Game.reset_tick_delay = false;
+		return false;
+	}
+}
+
 static void
 snake_move_left(void)
 {
+	switch (Game.dir) {
+	case DIR_N:
+		Game.dir = DIR_W;
+		break;
+	case DIR_S:
+		Game.dir = DIR_E;
+		break;
+	case DIR_E:
+		Game.dir = DIR_N;
+		break;
+	case DIR_W:
+		Game.dir = DIR_S;
+		break;
+	}
+
+	game_update(true);
 }
 
 static void
 snake_move_right(void)
 {
+	switch (Game.dir) {
+	case DIR_N:
+		Game.dir = DIR_E;
+		break;
+	case DIR_S:
+		Game.dir = DIR_W;
+		break;
+	case DIR_E:
+		Game.dir = DIR_S;
+		break;
+	case DIR_W:
+		Game.dir = DIR_N;
+		break;
+	}
+
+	game_update(true);
 }
 
 static void
@@ -82,14 +199,19 @@ main(void)
 {
 	stdio_init_all();
 	ws2812_init();
-
 	button_init(PIN_BUTTON_A, snake_move_left);
 	button_init(PIN_BUTTON_B, snake_move_right);
+	add_repeating_timer_ms(GAME_TICK_MS, repeating_timer_callback, NULL, &timer);
 
-	ws2812_fill(0);
+	Game.head = 10;
+	Game.dir = DIR_E;
+	Game.board[14] = TILE_APPLE;
+	Game.board[Game.head] = TILE_SNAKE*2;
+
+	game_draw();
+
 	for (;;) {
-		ws2812_blit();
-		sleep_ms(3000);
+		tight_loop_contents();
 	}
 }
 

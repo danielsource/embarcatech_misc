@@ -94,7 +94,7 @@ ws2812_blit(void)
 				WS2812.pio,
 				WS2812.sm,
 				WS2812.pixels[5 + x]);
-	
+
 	for (x = 4; x >= 0; --x)
 		pio_sm_put_blocking(
 				WS2812.pio,
