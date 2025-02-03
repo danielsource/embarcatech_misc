@@ -1,7 +1,9 @@
 # snake_game
 
+![GIF de demonstração](demo.gif)
+
 Jogo da cobrinha para a BitDogLab usando a
-matriz de LEDs 5x5 e os botões A e B.
+matriz de LED 5x5 e os botões A e B.
 
 ## Exemplo de compilação em GNU/Linux
 

@@ -17,6 +17,7 @@ add_compile_options(-Wall -Wextra -Wpedantic -Wshadow -Wno-parentheses)
 add_executable(${PROJECT_NAME} src/snake.c)
 target_link_libraries(${PROJECT_NAME}
 	pico_stdlib
+	pico_rand
 	hardware_pio)
 
 pico_sdk_init()

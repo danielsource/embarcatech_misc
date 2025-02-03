@@ -2,6 +2,8 @@ Arquivos/tarefas do aluno Daniel de Lima Franceschetti para o programa EmbarcaTe
 Na maior parte do tempo foi usado a placa [BitDogLab v6.3](https://github.com/BitDogLab/BitDogLab)
 com o [pico-sdk](https://github.com/raspberrypi/pico-sdk).
 
+[Um jogo da cobrinha na BitDogLab](/snake_game).
+
 
 ## Unidade 4
 

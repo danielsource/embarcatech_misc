@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "pico/stdlib.h"
+#include "pico/rand.h"
 #include "ws2812.pio.h"
 
 /* BitDogLab built-ins */
@@ -9,10 +10,23 @@
 
 #define GAME_TICK_MS 1000
 
+#define SNAKE_INITIAL_SIZE 2
+
+#define COLOR_SNAKE           0x03000000
+#define COLOR_SNAKE_HEAD      0x21000100
+#define COLOR_SNAKE_HURT      0x00000100
+#define COLOR_SNAKE_HEAD_HURT 0x00001100
+#define COLOR_EMPTY           0x00000000
+#define COLOR_APPLE           0x00440000
+#define COLOR_YOU_WON         0x32520200
+#define COLOR_INVALID         0x01010100
+
 #define BUTTON_FALL_DELAY_MS 50
 #define BUTTON_RISE_DELAY_MS 50
 
-enum BoardTile {TILE_SNAKE=-1, TILE_EMPTY=0, TILE_APPLE=2};
+enum {TileSnake=-1, TileEmpty=0, TileApple=1};
+enum {DirN, DirS, DirE, DirW};
+enum {SceneGame, SceneGameOver, SceneGameWon};
 
 typedef struct {
 	bool pressed;
@@ -22,62 +36,105 @@ typedef struct {
 } Button;
 
 static volatile struct {
+	int8_t scene;
 	int8_t board[25];
 	int8_t head;
-	enum {DIR_N, DIR_S, DIR_E, DIR_W} dir;
+	int8_t dir;
+	bool already_moved;
 } Game;
 
 static volatile Button buttons[PIN_BUTTON_B+1];
-
-static bool repeating_timer_callback(__unused struct repeating_timer *t);
-
-static struct repeating_timer timer;
 
 static void
 game_draw(void)
 {
 	int8_t i;
 
-	for (i = 0; i < 25; ++i) {
-		if (Game.board[i] <= TILE_SNAKE) {
-			WS2812.pixels[i] = 0x22000000;
-		} else if (Game.board[i] == TILE_EMPTY) {
-			WS2812.pixels[i] = 0x00000000;
-		} else if (Game.board[i] == TILE_APPLE) {
-			WS2812.pixels[i] = 0x00440000;
-		} else {
-			WS2812.pixels[i] = 0x01010100;
-		}
+	fputs("\033[2J", stdout);
+	fflush(stdout);
+
+	if (Game.scene == SceneGameWon) {
+		ws2812_fill(COLOR_YOU_WON);
+		ws2812_blit();
+		puts(":)");
+		return;
 	}
 
+	for (i = 0; i < 25; ++i) {
+		if (i%5 == 0)
+			putchar('\n');
+		printf("%3d", Game.board[i]);
+
+		if (Game.board[i] <= TileSnake) {
+			WS2812.pixels[i] = Game.scene==SceneGameOver
+				? COLOR_SNAKE_HURT : COLOR_SNAKE;
+		} else if (Game.board[i] == TileEmpty) {
+			WS2812.pixels[i] = COLOR_EMPTY;
+		} else if (Game.board[i] == TileApple) {
+			WS2812.pixels[i] = COLOR_APPLE;
+		} else {
+			WS2812.pixels[i] = COLOR_INVALID;
+		}
+	}
+	putchar('\n');
+
+	WS2812.pixels[Game.head] = Game.scene==SceneGameOver
+		? COLOR_SNAKE_HEAD_HURT : COLOR_SNAKE_HEAD;
 	ws2812_blit();
 }
 
 static void
-game_update()
+game_gen_apple(void)
+{
+	int8_t i, pos_count = 0;
+	int8_t valid_pos[25];
+
+	for (i = 0; i < 25; ++i)
+		if (Game.board[i] == TileEmpty)
+			valid_pos[pos_count++] = i;
+
+	if (pos_count == 0) {
+		Game.scene = SceneGameWon;
+		return;
+	}
+
+	Game.board[ valid_pos[get_rand_32()%pos_count] ] = TileApple;
+}
+
+static bool
+game_update(__unused struct repeating_timer *t)
 {
 	int8_t i, lasthead;
 
+	Game.already_moved = false;
+
+	switch (Game.scene) {
+	case SceneGame:     goto scene_game;
+	case SceneGameOver: goto scene_game_over;
+	case SceneGameWon:  goto scene_game_won;
+	}
+
+scene_game:
 	lasthead = Game.head;
 
 	switch (Game.dir) {
-	case DIR_N:
+	case DirN:
 		Game.head -= 5;
 		if (Game.head < 0)
 			Game.head += 25;
 		break;
-	case DIR_S:
+	case DirS:
 		Game.head += 5;
 		if (Game.head >= 25)
 			Game.head -= 25;
 		break;
-	case DIR_E:
+	case DirE:
 		if (Game.head%5 == 4)
 			Game.head -= 4;
 		else
 			Game.head += 1;
 		break;
-	case DIR_W:
+	case DirW:
 		if (Game.head%5 == 0)
 			Game.head += 4;
 		else
@@ -85,60 +142,94 @@ game_update()
 		break;
 	}
 
-	Game.board[Game.head] = Game.board[lasthead] - 1;
-
-	for (i = 0; i < 25; ++i) {
-		if (Game.board[i] <= TILE_SNAKE) {
-			Game.board[i] += 1;
-		}
+	if (Game.board[Game.head] <= TileSnake) {
+		Game.scene = SceneGameOver;
+	} else if (Game.board[Game.head] == TileApple) {
+		Game.board[lasthead] -= 1;
+		game_gen_apple();
 	}
 
+	Game.board[Game.head] = Game.board[lasthead] - 1;
+	for (i = 0; i < 25; ++i)
+		if (Game.board[i] <= TileSnake)
+			Game.board[i] += 1;
+
+scene_game_over:
+scene_game_won:
 	game_draw();
+
+	return true;
 }
 
-static bool
-repeating_timer_callback(__unused struct repeating_timer *t)
+static void
+game_init(void)
 {
-	game_update();
-	return true;
+	int8_t i;
+
+	Game.scene = SceneGame;
+	Game.head = 10;
+	Game.dir = DirE;
+
+	for (i = 0; i < 25; ++i)
+		Game.board[i] = TileEmpty;
+	Game.board[14] = TileApple;
+	Game.board[Game.head] = TileSnake*SNAKE_INITIAL_SIZE;
+
+	Game.already_moved = false;
+
+	game_draw();
 }
 
 static void
 snake_move_left(void)
 {
+	if (Game.scene == SceneGameOver || Game.scene == SceneGameWon) {
+		game_init();
+		return;
+	} else if (Game.already_moved) {
+		return;
+	}
 	switch (Game.dir) {
-	case DIR_N:
-		Game.dir = DIR_W;
+	case DirN:
+		Game.dir = DirW;
 		break;
-	case DIR_S:
-		Game.dir = DIR_E;
+	case DirS:
+		Game.dir = DirE;
 		break;
-	case DIR_E:
-		Game.dir = DIR_N;
+	case DirE:
+		Game.dir = DirN;
 		break;
-	case DIR_W:
-		Game.dir = DIR_S;
+	case DirW:
+		Game.dir = DirS;
 		break;
 	}
+	Game.already_moved = true;
 }
 
 static void
 snake_move_right(void)
 {
+	if (Game.scene == SceneGameOver || Game.scene == SceneGameWon) {
+		game_init();
+		return;
+	} else if (Game.already_moved) {
+		return;
+	}
 	switch (Game.dir) {
-	case DIR_N:
-		Game.dir = DIR_E;
+	case DirN:
+		Game.dir = DirE;
 		break;
-	case DIR_S:
-		Game.dir = DIR_W;
+	case DirS:
+		Game.dir = DirW;
 		break;
-	case DIR_E:
-		Game.dir = DIR_S;
+	case DirE:
+		Game.dir = DirS;
 		break;
-	case DIR_W:
-		Game.dir = DIR_N;
+	case DirW:
+		Game.dir = DirN;
 		break;
 	}
+	Game.already_moved = true;
 }
 
 static void
@@ -182,22 +273,16 @@ button_init(uint gpio, void (*if_pressed)(void))
 int
 main(void)
 {
+	struct repeating_timer timer;
+
 	stdio_init_all();
 	ws2812_init();
 	button_init(PIN_BUTTON_A, snake_move_left);
 	button_init(PIN_BUTTON_B, snake_move_right);
-	add_repeating_timer_ms(GAME_TICK_MS, repeating_timer_callback, NULL, &timer);
 
-	Game.head = 10;
-	Game.dir = DIR_E;
-	Game.board[14] = TILE_APPLE;
-	Game.board[Game.head] = TILE_SNAKE*2;
+	game_init();
+	add_repeating_timer_ms(GAME_TICK_MS, game_update, NULL, &timer);
 
-	game_draw();
-
-	for (;;) {
+	for (;;)
 		tight_loop_contents();
-	}
 }
-
-/* vim:set spelllang=en,pt_br: */
