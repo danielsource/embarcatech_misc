@@ -25,7 +25,6 @@ static volatile struct {
 	int8_t board[25];
 	int8_t head;
 	enum {DIR_N, DIR_S, DIR_E, DIR_W} dir;
-	bool reset_tick_delay;
 } Game;
 
 static volatile Button buttons[PIN_BUTTON_B+1];
@@ -55,7 +54,7 @@ game_draw(void)
 }
 
 static void
-game_update(bool reset_tick_delay)
+game_update()
 {
 	int8_t i, lasthead;
 
@@ -95,23 +94,13 @@ game_update(bool reset_tick_delay)
 	}
 
 	game_draw();
-
-	if (reset_tick_delay && !Game.reset_tick_delay) {
-		Game.reset_tick_delay = true;
-		add_repeating_timer_ms(GAME_TICK_MS, repeating_timer_callback, NULL, &timer);
-	}
 }
 
 static bool
 repeating_timer_callback(__unused struct repeating_timer *t)
 {
-	if (!Game.reset_tick_delay) {
-		game_update(false);
-		return true;
-	} else {
-		Game.reset_tick_delay = false;
-		return false;
-	}
+	game_update();
+	return true;
 }
 
 static void
@@ -131,8 +120,6 @@ snake_move_left(void)
 		Game.dir = DIR_S;
 		break;
 	}
-
-	game_update(true);
 }
 
 static void
@@ -152,8 +139,6 @@ snake_move_right(void)
 		Game.dir = DIR_N;
 		break;
 	}
-
-	game_update(true);
 }
 
 static void
