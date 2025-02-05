@@ -1,4 +1,4 @@
-Arquivos/tarefas do aluno Daniel de Lima Franceschetti para o programa EmbarcaTech 2024-2025.
+Arquivos/tarefas do aluno Daniel de Lima Franceschetti para o programa EmbarcaTech 2024-2025 (TIC 37).
 Na maior parte do tempo foi usado a placa [BitDogLab v6.3](https://github.com/BitDogLab/BitDogLab)
 com o [pico-sdk](https://github.com/raspberrypi/pico-sdk).
 
