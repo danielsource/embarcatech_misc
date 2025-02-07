@@ -130,7 +130,7 @@ typedef struct {
 
 static void ssd1306_init(void);
 static void ssd1306_update(void);
-static void ssd1306_put_char(uint8_t ch);
+static void ssd1306_put_char(char ch);
 static void ssd1306_del_char(void);
 static void ssd1306_put_info(const char *msg);
 
@@ -174,7 +174,8 @@ ssd1306_send_buf(uint8_t *buf, int buflen)
 }
 
 static void
-ssd1306_render(uint8_t *buf, ssd1306_RenderArea *area) {
+ssd1306_render(uint8_t *buf, ssd1306_RenderArea *area)
+{
 	uint8_t cmds[] = {
 		SSD1306_SET_COL_ADDR,
 		area->start_col,
@@ -185,6 +186,20 @@ ssd1306_render(uint8_t *buf, ssd1306_RenderArea *area) {
 	};
 	ssd1306_send_cmd_list(cmds, count_of(cmds));
 	ssd1306_send_buf(buf, area->buflen);
+}
+
+static uint8_t
+ssd1306_char_idx(char ch)
+{
+	if (ch >= 'A' && ch <= 'Z') {
+		return ch-'A';
+	} else if (ch >= 'a' && ch <= 'z') {
+		return ch-'a' + ssd1306_Char_a;
+	} else if (ch >= '0' && ch <= '9') {
+		return ch-'0' + ssd1306_Char_0;
+	} else {
+		return ssd1306_Char_Space;
+	}
 }
 
 void
@@ -231,7 +246,7 @@ ssd1306_init(void)
 
 	ssd1306_send_cmd_list(cmds, count_of(cmds));
 
-	ssd1306_frame_area.buflen = (ssd1306_frame_area.end_col - ssd1306_frame_area.start_col + 1) 
+	ssd1306_frame_area.buflen = (ssd1306_frame_area.end_col - ssd1306_frame_area.start_col + 1)
 		* (ssd1306_frame_area.end_page - ssd1306_frame_area.start_page + 1);
 
 	ssd1306_update();
@@ -244,9 +259,9 @@ ssd1306_update(void)
 }
 
 void
-ssd1306_put_char(uint8_t ch)
+ssd1306_put_char(char ch)
 {
-	ssd1306_text.data[ssd1306_text.cursor++] = ch;
+	ssd1306_text.data[ssd1306_text.cursor++] = ssd1306_char_idx(ch);
 }
 
 void
@@ -264,19 +279,11 @@ ssd1306_put_info(const char *msg)
 	memset(ssd1306_buf + (y-1)*SSD1306_WIDTH, 0x10, SSD1306_WIDTH);
 	memset(ssd1306_buf + y*SSD1306_WIDTH, 0x00, SSD1306_WIDTH);
 
-	while ((ch = *msg++) != '\0') {
-		if ((ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z')) {
-			ch -= 'A';
-		} else if (ch >= '0' && ch <= '9') {
-			ch = ch-'0' + ssd1306_Char_0;
-		} else {
-			ch = ssd1306_Char_Space;
-		}
-
-		for (int i = 0; i < SSD1306_FONT_WIDTH; ++i) {
-			ssd1306_buf[y*SSD1306_WIDTH + x + i] = ssd1306_font[ch*SSD1306_FONT_WIDTH + i];
-		}
-
+	while (*msg != '\0') {
+		ch = ssd1306_char_idx(*msg++);
+		for (int i = 0; i < SSD1306_FONT_WIDTH; ++i)
+			ssd1306_buf[y*SSD1306_WIDTH + x + i] =
+				ssd1306_font[ch*SSD1306_FONT_WIDTH + i];
 		x += SSD1306_FONT_WIDTH;
 	}
 }

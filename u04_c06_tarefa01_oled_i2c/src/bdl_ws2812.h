@@ -24,10 +24,10 @@ WS2812.pixels color format:
   00 are the unused least significant 8 bits
 */
 
-static inline void ws2812_init(void);
-static inline void ws2812_update(void);
-static inline void ws2812_fill(uint32_t color);
-static inline void ws2812_put_digit(char digit, uint32_t bg, uint32_t fg);
+static void ws2812_init(void);
+static void ws2812_update(void);
+static void ws2812_fill(uint32_t color);
+static void ws2812_put_digit(char digit, uint32_t bg, uint32_t fg);
 
 #define ws2812_put_color(x, y, color)\
 	WS2812.pixels[y*5 + x] = color

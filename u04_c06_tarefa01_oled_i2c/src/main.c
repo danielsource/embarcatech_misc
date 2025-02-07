@@ -105,24 +105,20 @@ main(void)
 	button_init(PIN_BUTTON_A, led_green_toggle);
 	button_init(PIN_BUTTON_B, led_blue_toggle);
 
-	led_show_states();
+	ssd1306_put_info("Hello World 123");
+	ssd1306_update();
 	for (;;) {
 		ch = getchar();
 
-		if ((ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z')) {
-			ssd1306_put_char(ch-'A');
+		if ((ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z') || ch == ' ') {
+			ssd1306_put_char(ch);
 			ssd1306_update();
 			ws2812_fill(0x0);
 			ws2812_update();
 		} else if (ch >= '0' && ch <= '9') {
-			ssd1306_put_char(ch-'0' + ssd1306_Char_0);
+			ssd1306_put_char(ch);
 			ssd1306_update();
 			ws2812_put_digit(ch, 0x0, 0x00000600);
-			ws2812_update();
-		} else if (ch == ' ') {
-			ssd1306_put_char(ssd1306_Char_Space);
-			ssd1306_update();
-			ws2812_fill(0x0);
 			ws2812_update();
 		} else if (ch == '\b') {
 			ssd1306_del_char();
