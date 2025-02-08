@@ -42,5 +42,7 @@
 void ssd1306_init(void);
 void ssd1306_update(void);
 void ssd1306_put_char(char ch);
+void ssd1306_put_str(const char *str);
 void ssd1306_del_char(void);
+void ssd1306_clr_chars(void);
 void ssd1306_put_info(const char *msg);

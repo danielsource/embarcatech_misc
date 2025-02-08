@@ -187,15 +187,55 @@ ssd1306_update(void)
 }
 
 void
-ssd1306_put_char(char ch)
+ssd1306_put_char(char ch_)
 {
-	ssd1306_text.data[ssd1306_text.cursor++] = ssd1306_char_idx(ch);
+	uint8_t x, y;
+	uint8_t ch;
+	int i;
+
+	if (ssd1306_text.cursor == SSD1306_TEXTAREA_SIZE)
+		return;
+
+	ssd1306_text.data[ssd1306_text.cursor] = ch = ssd1306_char_idx(ch_);
+
+	x = ssd1306_text.cursor % SSD1306_TEXTAREA_LINE * SSD1306_FONT_WIDTH;
+	y = ssd1306_text.cursor / SSD1306_TEXTAREA_LINE;
+
+	for (i = 0; i < SSD1306_FONT_WIDTH; ++i)
+		ssd1306_buf[1 + y*SSD1306_WIDTH + x + i] =
+			ssd1306_font[ch*SSD1306_FONT_WIDTH + i];
+
+	++ssd1306_text.cursor;
+}
+
+void
+ssd1306_put_str(const char *str)
+{
+	while (ssd1306_text.cursor < SSD1306_TEXTAREA_SIZE && *str)
+		ssd1306_put_char(*str++);
 }
 
 void
 ssd1306_del_char(void)
 {
+	uint8_t x, y;
+
+	if (ssd1306_text.cursor == 0)
+		return;
+
 	--ssd1306_text.cursor;
+
+	x = ssd1306_text.cursor % SSD1306_TEXTAREA_LINE * SSD1306_FONT_WIDTH;
+	y = ssd1306_text.cursor / SSD1306_TEXTAREA_LINE;
+
+	memset(ssd1306_buf+1 + y*SSD1306_WIDTH + x, 0x00, SSD1306_FONT_WIDTH);
+}
+
+void
+ssd1306_clr_chars(void)
+{
+	while (ssd1306_text.cursor)
+		ssd1306_del_char();
 }
 
 void

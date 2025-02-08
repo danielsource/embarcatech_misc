@@ -99,7 +99,13 @@ main(void)
 	button_init(PIN_BUTTON_A, led_green_toggle);
 	button_init(PIN_BUTTON_B, led_blue_toggle);
 
-	ssd1306_put_info("Hello World 123");
+	ssd1306_put_str(
+			"ABCDEFGHIJKLMNOPQRSTU"
+			"VWXYZabcdefghijklmnop"
+			"qrstuvwxyz0123456789 "
+			"The quick brown fox  "
+			"jumps over the lazy  "
+			"dog");
 	ssd1306_update();
 	for (;;) {
 		ch = getchar();
@@ -113,6 +119,11 @@ main(void)
 			ssd1306_put_char(ch);
 			ssd1306_update();
 			ws2812_put_digit(ch, 0x0, 0x00000600);
+			ws2812_update();
+		} else if (ch == '\r') {
+			ssd1306_clr_chars();
+			ssd1306_update();
+			ws2812_fill(0x0);
 			ws2812_update();
 		} else if (ch == '\b') {
 			ssd1306_del_char();
