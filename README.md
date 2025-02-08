@@ -7,6 +7,9 @@ com o [pico-sdk](https://github.com/raspberrypi/pico-sdk).
 
 ## Unidade 4
 
+### Capítulo 6
+* [Tarefa 1 (controlando display SSD1306)](/u04_c06_tarefa01_oled_i2c)
+
 ### Capítulo 5
 * Tarefa 2 _[sic]_ (temporizadores/alarmes na BitDogLab)
   * [(atividade 1)](/u04_c05_tarefa01_trafficlight)

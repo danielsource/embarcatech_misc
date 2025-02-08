@@ -5,11 +5,12 @@
 Projeto para a placa [BitDogLab](https://github.com/BitDogLab/BitDogLab) 6.3
 (contendo Pico W).
 
-Controles no terminal serial:
+| controles (serial)         | função      |
+|----------------------------|-------------|
 | <kbd>a</kbd>-<kbd>z</kbd>,<kbd>A</kbd>-<kbd>Z</kbd>,<kbd>0</kbd>-<kbd>9</kbd>,<kbd>Space</kbd> | Inserir texto no display SSD1306
 | <kbd>0</kbd>-<kbd>9</kbd>  | Exibir dígito na matriz WS2812
-| <kbd>⌫ Backspace</kbd>     | Deletar último caractere
-| <kbd>⏎ Enter</kbd>         | Deletar todos caracteres
+| <kbd>⌫ Backspace</kbd>     | Deletar último caractere no display SSD1306
+| <kbd>⏎ Enter</kbd>         | Deletar todos caracteres no display SSD1306
 
 ## Exemplo de utilização no Linux
 
