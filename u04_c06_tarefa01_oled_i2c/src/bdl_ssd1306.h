@@ -2,12 +2,13 @@
          based on this example: https://github.com/raspberrypi/pico-examples/tree/master/i2c/ssd1306_i2c
 */
 
-#define SSD1306_WIDTH  128
-#define SSD1306_HEIGHT 64
-#define SSD1306_FONT_WIDTH 6  /* height is always 8 */
-#define SSD1306_I2C_PORT i2c1
-#define SSD1306_I2C_SDA  14
-#define SSD1306_I2C_SCL  15
+#define SSD1306_WIDTH       128
+#define SSD1306_HEIGHT      64
+#define SSD1306_FONT_WIDTH  6  /* height is always SSD1306_PAGE_HEIGHT */
+#define SSD1306_I2C_PORT    i2c1
+#define SSD1306_I2C_SDA     14
+#define SSD1306_I2C_SCL     15
+#define SSD1306_COM_PIN_CFG 0x12
 
 #define SSD1306_I2C_ADDR            _u(0x3C)
 #define SSD1306_I2C_CLK             400
@@ -35,9 +36,14 @@
 #define SSD1306_SET_VCOM_DESEL      _u(0xDB)
 #define SSD1306_PAGE_HEIGHT         _u(8)
 #define SSD1306_NUM_PAGES           (SSD1306_HEIGHT / SSD1306_PAGE_HEIGHT)
-#define SSD1306_BUF_LEN             (SSD1306_NUM_PAGES * SSD1306_WIDTH)
-#define SSD1306_WRITE_MODE         _u(0xFE)
-#define SSD1306_READ_MODE          _u(0xFF)
+#define SSD1306_BUF_LEN             (SSD1306_NUM_PAGES * SSD1306_WIDTH + 1 /*for cmd*/)
+#define SSD1306_WRITE_MODE          _u(0xFE)
+#define SSD1306_READ_MODE           _u(0xFF)
+
+#define SSD1306_TEXTAREA_LINE (SSD1306_WIDTH / SSD1306_FONT_WIDTH)
+#define SSD1306_TEXTAREA_SIZE ((SSD1306_NUM_PAGES - 2) * SSD1306_TEXTAREA_LINE)
+
+#define LENGTH(arr) (sizeof(arr)/sizeof((arr)[0]))
 
 enum {
 	ssd1306_Char_A = 0,
@@ -109,22 +115,8 @@ enum {
 	ssd1306_CharCount
 };
 
-enum {
-	ssd1306_TextArea_Line = SSD1306_WIDTH / SSD1306_FONT_WIDTH,
-	ssd1306_TextArea_Size = (SSD1306_HEIGHT/8 - 2)*ssd1306_TextArea_Line
-};
-
 typedef struct {
-    uint8_t start_col;
-    uint8_t end_col;
-    uint8_t start_page;
-    uint8_t end_page;
-
-    int buflen;
-} ssd1306_RenderArea;
-
-typedef struct {
-	uint8_t data[ssd1306_TextArea_Size];
+	uint8_t data[SSD1306_TEXTAREA_SIZE];
 	uint8_t cursor;
 } ssd1306_TextArea;
 
@@ -134,58 +126,34 @@ static void ssd1306_put_char(char ch);
 static void ssd1306_del_char(void);
 static void ssd1306_put_info(const char *msg);
 
-static const uint8_t ssd1306_font[ssd1306_CharCount*SSD1306_FONT_WIDTH] = {
+static const uint8_t ssd1306_font[ssd1306_CharCount * SSD1306_FONT_WIDTH] = {
 #include "font.inc"
-};
-
-static ssd1306_RenderArea ssd1306_frame_area = {
-	.start_col = 0,
-	.end_col = SSD1306_WIDTH - 1,
-	.start_page = 0,
-	.end_page = SSD1306_NUM_PAGES - 1
 };
 
 static ssd1306_TextArea ssd1306_text;
 
-static uint8_t ssd1306_buf[SSD1306_BUF_LEN];
+static uint8_t ssd1306_buf[SSD1306_BUF_LEN] = {0x40};
 
 static void
 ssd1306_send_cmd(uint8_t cmd)
 {
-	uint8_t buf[2] = {0x80, cmd};
+	uint8_t buf[2] = {0x80};
+	buf[1] = cmd;
 	i2c_write_blocking(SSD1306_I2C_PORT, SSD1306_I2C_ADDR, buf, 2, false);
 }
 
 static void
 ssd1306_send_cmd_list(uint8_t *buf, int num)
 {
-	for (int i = 0; i < num; ++i)
+	int i;
+	for (i = 0; i < num; ++i)
 		ssd1306_send_cmd(buf[i]);
 }
 
 static void
 ssd1306_send_buf(uint8_t *buf, int buflen)
 {
-    uint8_t *temp_buf = malloc(buflen + 1);
-    temp_buf[0] = 0x40;
-    memcpy(temp_buf+1, buf, buflen);
-    i2c_write_blocking(SSD1306_I2C_PORT, SSD1306_I2C_ADDR, temp_buf, buflen + 1, false);
-    free(temp_buf);
-}
-
-static void
-ssd1306_render(uint8_t *buf, ssd1306_RenderArea *area)
-{
-	uint8_t cmds[] = {
-		SSD1306_SET_COL_ADDR,
-		area->start_col,
-		area->end_col,
-		SSD1306_SET_PAGE_ADDR,
-		area->start_page,
-		area->end_page
-	};
-	ssd1306_send_cmd_list(cmds, count_of(cmds));
-	ssd1306_send_buf(buf, area->buflen);
+	i2c_write_blocking(SSD1306_I2C_PORT, SSD1306_I2C_ADDR, buf, buflen, false);
 }
 
 static uint8_t
@@ -205,13 +173,7 @@ ssd1306_char_idx(char ch)
 void
 ssd1306_init(void)
 {
-	i2c_init(SSD1306_I2C_PORT, SSD1306_I2C_CLK*1000);
-	gpio_set_function(SSD1306_I2C_SDA, GPIO_FUNC_I2C);
-	gpio_set_function(SSD1306_I2C_SCL, GPIO_FUNC_I2C);
-	gpio_pull_up(SSD1306_I2C_SDA);
-	gpio_pull_up(SSD1306_I2C_SCL);
-
-	uint8_t cmds[] = {
+	static uint8_t cmds[] = {
 		SSD1306_SET_DISP,               /* set display off */
 		/* memory mapping */
 		SSD1306_SET_MEM_MODE,           /* set memory address mode 0 = horizontal, 1 = vertical, 2 = page */
@@ -225,7 +187,7 @@ ssd1306_init(void)
 		SSD1306_SET_DISP_OFFSET,        /* set display offset */
 		0x00,                           /* no offset */
 		SSD1306_SET_COM_PIN_CFG,        /* set COM (common) pins hardware configuration; board specific magic number; */
-		0x12,                           /* 0x02 works for 128x32, 0x12 possibly works for 128x64; other options 0x22, 0x32 */
+		SSD1306_COM_PIN_CFG,            /* 0x02 works for 128x32, 0x12 possibly works for 128x64; other options 0x22, 0x32 */
 		/* timing and driving scheme */
 		SSD1306_SET_DISP_CLK_DIV,       /* set display clock divide ratio */
 		0x80,                           /* div ratio of 1, standard freq */
@@ -244,18 +206,28 @@ ssd1306_init(void)
 		SSD1306_SET_DISP | 0x01,        /* turn display on */
 	};
 
-	ssd1306_send_cmd_list(cmds, count_of(cmds));
-
-	ssd1306_frame_area.buflen = (ssd1306_frame_area.end_col - ssd1306_frame_area.start_col + 1)
-		* (ssd1306_frame_area.end_page - ssd1306_frame_area.start_page + 1);
-
+	i2c_init(SSD1306_I2C_PORT, SSD1306_I2C_CLK*1000);
+	gpio_set_function(SSD1306_I2C_SDA, GPIO_FUNC_I2C);
+	gpio_set_function(SSD1306_I2C_SCL, GPIO_FUNC_I2C);
+	gpio_pull_up(SSD1306_I2C_SDA);
+	gpio_pull_up(SSD1306_I2C_SCL);
+	ssd1306_send_cmd_list(cmds, LENGTH(cmds));
 	ssd1306_update();
 }
 
 void
 ssd1306_update(void)
 {
-	ssd1306_render(ssd1306_buf, &ssd1306_frame_area);
+	static uint8_t cmds[] = {
+		SSD1306_SET_COL_ADDR,
+		0,
+		SSD1306_WIDTH-1,
+		SSD1306_SET_PAGE_ADDR,
+		0,
+		SSD1306_NUM_PAGES-1
+	};
+	ssd1306_send_cmd_list(cmds, LENGTH(cmds));
+	ssd1306_send_buf(ssd1306_buf, SSD1306_BUF_LEN);
 }
 
 void
@@ -273,16 +245,17 @@ ssd1306_del_char(void)
 void
 ssd1306_put_info(const char *msg)
 {
-	uint8_t x = 0, y = SSD1306_HEIGHT/8 - 1;
+	uint8_t x = 0, y = SSD1306_NUM_PAGES-1;
 	uint8_t ch;
+	int i;
 
-	memset(ssd1306_buf + (y-1)*SSD1306_WIDTH, 0x10, SSD1306_WIDTH);
-	memset(ssd1306_buf + y*SSD1306_WIDTH, 0x00, SSD1306_WIDTH);
+	memset(ssd1306_buf+1 + (y-1)*SSD1306_WIDTH, 0x10, SSD1306_WIDTH);
+	memset(ssd1306_buf+1 + y*SSD1306_WIDTH, 0x00, SSD1306_WIDTH);
 
 	while (*msg != '\0') {
 		ch = ssd1306_char_idx(*msg++);
-		for (int i = 0; i < SSD1306_FONT_WIDTH; ++i)
-			ssd1306_buf[y*SSD1306_WIDTH + x + i] =
+		for (i = 0; i < SSD1306_FONT_WIDTH; ++i)
+			ssd1306_buf[1 + y*SSD1306_WIDTH + x + i] =
 				ssd1306_font[ch*SSD1306_FONT_WIDTH + i];
 		x += SSD1306_FONT_WIDTH;
 	}

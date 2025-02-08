@@ -30,11 +30,9 @@ static volatile Button buttons[PIN_BUTTON_B+1];
 static void
 led_show_states(void)
 {
-	char str[6] = "G0 B0";
-	if (gpio_get(PIN_GREEN))
-		str[1] = '1';
-	if (gpio_get(PIN_BLUE))
-		str[4] = '1';
+	static char str[6] = "G0 B0";
+	str[1] = gpio_get(PIN_GREEN)? '1' : '0';
+	str[4] = gpio_get(PIN_BLUE)? '1' : '0';
 	ssd1306_put_info(str);
 	ssd1306_update();
 	puts(str);
