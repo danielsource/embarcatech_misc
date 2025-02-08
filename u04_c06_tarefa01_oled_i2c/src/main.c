@@ -1,11 +1,7 @@
 /* Aluno: Daniel de Lima Franceschetti */
 
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include "pico/stdlib.h"
-#include "hardware/i2c.h"
-#include "ws2812.pio.h"
 
 /* BitDogLab built-ins */
 #define PIN_BUTTON_A 5

@@ -14,7 +14,10 @@ project(oled_i2c C CXX ASM)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
 add_compile_options(-Wall -Wextra -Wpedantic -Wshadow -Wno-parentheses)
-add_executable(${PROJECT_NAME} src/main.c)
+add_executable(${PROJECT_NAME}
+	src/main.c
+	src/bdl_ws2812.c
+	src/bdl_ssd1306.c)
 target_link_libraries(${PROJECT_NAME}
 	pico_stdlib
 	hardware_pio
