@@ -7,7 +7,7 @@ com o [pico-sdk](https://github.com/raspberrypi/pico-sdk).
 
 ### Unidade 4
 
-* [Cap. 8 - Tarefa 1 (ADC para joystick)](/u04_c07_tarefa01_servomotor)
+* [Cap. 8 - Tarefa 1 (ADC para joystick)](/u04_c08_tarefa01_joystick)
 
 * [Cap. 7 - Tarefa 1 (PWM)](/u04_c07_tarefa01_servomotor)
 
