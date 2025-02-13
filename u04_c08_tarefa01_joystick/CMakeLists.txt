@@ -13,7 +13,7 @@ include(${PICO_SDK_PATH}/pico_sdk_init.cmake)
 project(joystick C CXX ASM)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
-add_compile_options(-Wall -Wextra -Wpedantic -Wshadow -Wno-parentheses)
+add_compile_options(-Wall -Wextra -Wpedantic -Wshadow -Wno-parentheses -Wno-format-truncation)
 add_executable(${PROJECT_NAME}
 	src/main.c
 	src/bdl_ssd1306.c)

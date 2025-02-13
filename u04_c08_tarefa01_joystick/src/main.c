@@ -15,13 +15,17 @@
 #define PIN_BLUE 12
 #include "bdl_ssd1306.h" /* código para o display OLED no GPIO14 e GPIO15 */
 
+#define PWM_SLICE_RED_BLUE 6
+#define PWM_SLICE_GREEN 5
+
 #define ADC_MAX 4095
 
-#define JS_DEAD_ZONE 280
+#define JS_DEAD_ZONE 260
 
 #define BTN_FALL_DELAY_MS 50
 #define BTN_RISE_DELAY_MS 50
 
+#define ABS(x)                ((x)<0 ? -(x) : (x))
 #define BETWEEN(x, low, high) ((x) >= (low) && (x) <= (high))
 
 typedef struct {
@@ -33,12 +37,24 @@ typedef struct {
 
 static volatile Button buttons[PIN_JS_BTN+1];
 
-static volatile bool leds_on = true;
+static void
+toggle_led_red_blue(void)
+{
+	static bool on = true;
+	if (on) {
+		pwm_set_gpio_level(PIN_RED, 0);
+		pwm_set_gpio_level(PIN_BLUE, 0);
+		pwm_set_enabled(PWM_SLICE_RED_BLUE, false);
+	} else {
+		pwm_set_enabled(PWM_SLICE_RED_BLUE, true);
+	}
+	on = !on;
+}
 
 static void
-leds_toggle(void)
+toggle_led_green(void)
 {
-	leds_on = !leds_on;
+	gpio_put(PIN_GREEN, !gpio_get(PIN_GREEN));
 }
 
 static void
@@ -88,14 +104,19 @@ main(void)
 
 	stdio_init_all();
 	ssd1306_init();
-	gpio_init(PIN_RED);   gpio_set_dir(PIN_RED, GPIO_OUT);
 	gpio_init(PIN_GREEN); gpio_set_dir(PIN_GREEN, GPIO_OUT);
-	gpio_init(PIN_BLUE);  gpio_set_dir(PIN_BLUE, GPIO_OUT);
-	button_init(PIN_BTN_A, leds_toggle);
+	button_init(PIN_BTN_A, toggle_led_red_blue);
+	button_init(PIN_JS_BTN, toggle_led_green);
 
 	adc_init();
 	adc_gpio_init(PIN_JS_X);
 	adc_gpio_init(PIN_JS_Y);
+
+	gpio_set_function(PIN_RED, GPIO_FUNC_PWM);
+	gpio_set_function(PIN_BLUE, GPIO_FUNC_PWM);
+	pwm_set_clkdiv(PWM_SLICE_RED_BLUE, 40.0f);
+	pwm_set_wrap(PWM_SLICE_RED_BLUE, 100);
+	pwm_set_enabled(PWM_SLICE_RED_BLUE, 1);
 
 	for (;;) {
 		adc_select_input(PIN_JS_X-26);
@@ -117,6 +138,25 @@ main(void)
 				jx, jy, jx_raw, jy_raw);
 		ssd1306_put_info(jstr);
 
+		if (gpio_get(PIN_GREEN)) {
+			for (i = 0; i < 4; ++i)
+				for (j = 0; j < SSD1306_WIDTH; ++j)
+					if (j & 1)
+						ssd1306_flip_bit(j, i);
+			for (i = SSD1306_HEIGHT-14; i < SSD1306_HEIGHT-12; ++i)
+				for (j = 0; j < SSD1306_WIDTH; ++j)
+					if (j & 1)
+						ssd1306_flip_bit(j, i);
+			for (i = 4; i < SSD1306_HEIGHT-14; ++i)
+				for (j = 0; j < 4; ++j)
+					if (i & 1)
+						ssd1306_flip_bit(j, i);
+			for (i = 4; i < SSD1306_HEIGHT-14; ++i)
+				for (j = SSD1306_WIDTH-4; j < SSD1306_WIDTH; ++j)
+					if (i & 1)
+						ssd1306_flip_bit(j, i);
+		}
+
 		for (i = 0; i < 8; ++i)
 			for (j = 0; j < 8; ++j)
 				ssd1306_flip_bit(jx-4+j, jy-4+i);
@@ -124,6 +164,9 @@ main(void)
 		ssd1306_update();
 		ssd1306_clear();
 
-		sleep_ms(50);
+		pwm_set_gpio_level(PIN_RED,  (float)ABS(jx - SSD1306_WIDTH/2) / (SSD1306_WIDTH/2) * 100);
+		pwm_set_gpio_level(PIN_BLUE, (float)ABS(jy - SSD1306_HEIGHT/2) / (SSD1306_HEIGHT/2) * 70);
+
+		sleep_ms(33);
 	}
 }
